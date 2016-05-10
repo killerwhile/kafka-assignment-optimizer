@@ -201,6 +201,10 @@ Proposed partition reassignment configuration
 Copy the `Current partition replica assignment` part and past it in the
 `partitions` attribute in the `payload.json` file, i.e. something like: 
 
+* `brokers` attribute is of the format: `brokerId[:rack][,brokerId[:rack]]*`, 
+  i.e. a list of comma-separated broker ids and optional `:rack` assignment. 
+* `partitions` attribute is a copy-paste of the `kafka-reassign-partitions` command
+
 ```
 {
     "brokers": "0:tor2,1:tor1,2:tor2,3:tor1",
