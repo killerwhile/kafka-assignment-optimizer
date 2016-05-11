@@ -231,7 +231,8 @@ kafka-reassign-partitions --zookeeper $ZK --reassignment-json-file reassignment-
 
 # No changes
 
-If no change, the API call answers:
+If the current assignment is already optimal, the API will simply answer with an empty list,
+as follow:
 
 ```
 {"version":1,"partitions":[]}
@@ -239,5 +240,5 @@ If no change, the API call answers:
 
 # Greetings
 
-* http://www.hostmath.com/ for the equation graphics
-
+* [http://www.hostmath.com/](http://www.hostmath.com/) for the equation graphics
+* [Lp_solve](http://lpsolve.sourceforge.net/5.5/) for the great open-source solver: 
