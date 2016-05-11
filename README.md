@@ -1,7 +1,7 @@
 Kafka Partitions Assignment Optimizer
 ====
 
-If you have more than 4 brokers spread on several top-of-rack switches (TOR),
+If you have more than 4 brokers spread on several top-of-rack switches (_TOR_),
 you might be interested in balancing replicas and leaders properly to
 survive to a switch failure and to avoid bottlenecks.
 
@@ -18,13 +18,13 @@ overall cluster availability.
 
 Also, if you running a version of Kafka which does not include
 [KIP-36 (rack aware replica assignment)](https://cwiki.apache.org/confluence/display/KAFKA/KIP-36+Rack+aware+replica+assignment))
-you don't have any knowledge of the network topology in the
+you don't have any knowledge about the network topology in the
 assignment algorithm.
 
 ## Demonstration: `kafka-reassign-partitions.sh` under-efficiency
 
-Assume have a cluster with 20 brokers, named 0-19, spread across 2 switches.
-Brokers with odd numbers are all on the same TOR `tor1`,
+Lets assume we have a cluster with 20 brokers, named 0-19, spread across 2 switches.
+Brokers with odd numbers are all on the same _TOR_ `tor1`,
 brokers with even numbers are wired to `tor2`.
 
 We have a topic `x.y.z.t` with 10 partitions and a replication factor of 2.
@@ -77,10 +77,11 @@ Proposed partition reassignment configuration
 ]}
 ```
 
-(I did just re-format and sort the json output for sake of clarity).
+_(I did just re-format and sort the json output for sake of clarity)._
 
 If you compare partition by partition, you can see a **lot** of changes in the partition assignment.
-When computing the diff manually, we could simply change the assignment of partition `1`, like
+That's rather unfortunate, since computing the diff manually,
+we could simply change the assignment of partition `1`, like:
 
 ```
     {"topic":"x.y.z.t","partition":1,"replicas":[8,1]},
@@ -91,30 +92,32 @@ All the other moves are not required.
 Of course `kafka-reassign-partitions` is only proposing an example reassignment
 configuration and editing manually might appear easy,
 but when you're dealing with bigger topics with 40 or more partitions 
-and you're under fire, you'd like to have a tool which is doing that for you properly
-without too many manual edits.
+and you're under fire, you'd probably like to have a tool
+on which you can rely to do that right without too many manual edits.
 
 LinkedIn open-sourced its [kafka-tools](https://github.com/linkedin/kafka-tools)
 which has really nice features for day to day operations, but lots of 
 `random.shuffle(replicas)` are used internally, which might end-up in
-sub-optimal placements. The tool don't have rack awareness either.
+sub-optimal placements. The tool don't have rack awareness either at the time 
+of writing.
 
 
-# Replica assignment as an optimization function
-
+# Replica assignment as a constraint satisfaction problem
+ 
 If you think out of the box, replicas assignments looks like an 
 [optimization function](https://en.wikipedia.org/wiki/Mathematical_optimization)
-under specific constraints.
-
+under specific constraints, or a
+[constraint satisfaction problem](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem)
 For instance, "no two replicas of the same partition assigned to the same broker" is one of
-these constraint.
+these constraints.
 
 To minimize the move of replicas, the idea is to assign more weight (i.e. more value)
 to existing assignments, so that the linear optimization will try to preserve
 existing assignment (and in turn minimising the number of bytes moved across the brokers).
 
 Let's define a variable as a concatenation of broker id and partition id, such as
-`b9_p6`. This variable will be 1 if the partition 6 is assigned to the broker 9.
+`b9_p6`. This variable will be 1 if the partition 6 is assigned to the broker 9,
+0 otherwise.
 
 The previous constraint, "no two replicas of the same partition assigned to the same broker",
 would be expressed as 
@@ -125,9 +128,8 @@ Now you got the trick, there are no limits on constraints to add. The current im
 includes for instance _leader preservation_, i.e. the preferred leader has more weight
 than the other partitions.
 
-[lp_solve]() is used in the background to solve the linear equation generated.
-
-
+[lp_solve](http://lpsolve.sourceforge.net/5.5/) is used behind the scene
+to solve the generated linear equation.
 
 
 ## Example of equation
@@ -234,3 +236,8 @@ If no change, the API call answers:
 ```
 {"version":1,"partitions":[]}
 ```
+
+# Greetings
+
+* http://www.hostmath.com/ for the equation graphics
+
