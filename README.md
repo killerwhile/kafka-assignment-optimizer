@@ -186,12 +186,12 @@ t1b1p0, t1b1p0_l, ... , t1b32p9, t1b32p9_l;
 
 # Real World Usage
 
-One public instance of Kafka Partitions Assignment Optimizer is hosted with ❤ by the DAPLAB.
+One public instance of Kafka Partitions Assignment Optimizer is hosted with ❤ by [Sqooba](http://sqooba.io).
 
-See [https://kafka-optimizer.daplab.ch/](https://kafka-optimizer.daplab.ch/)
+See [https://kafka-optimizer.sqooba.io/](https://kafka-optimizer.sqooba.io/)
 for an extended example.
 
-API endpoint: **https://kafka-optimizer.daplab.ch/submit**
+API endpoint: **https://kafka-optimizer.sqooba.io/submit**
 
 
 # Greetings
